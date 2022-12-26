@@ -1,0 +1,20 @@
+{
+    "name": "checkvin/api-package",
+    "description": "Package for working with CheckVin API",
+    "authors": [
+        {
+            "name": "Illia Radchenko",
+            "email": "fifa.leicester.city@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "CheckVin\\Api\\": "src/"
+        }
+    }
+}
