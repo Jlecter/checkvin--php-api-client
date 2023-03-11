@@ -3,103 +3,80 @@ declare(strict_types=1);
 
 namespace CheckVin\Api\Autocheck;
 
-use CheckVin\Api\Response\ApiResponse;
-use CheckVin\Api\Response\Error\ErrorResponse;
-use CheckVin\Api\Response\Success\Autocheck\CheckReportExists\SuccessResponse as ReportExistsSuccessResponse;
-use CheckVin\Api\Response\Success\Autocheck\VincodeAutocheck\SuccessResponse as VincodeAutocheckSuccessResponse;
-use stdClass;
+use CheckVin\Api\Config\ApiUriGlossary;
+use CheckVin\Api\Http\Client;
+use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
+use CheckVin\Api\Http\Response\ClientResponse;
+use CheckVin\Api\Http\Response\Error\ApplicationErrorResponse;
+use CheckVin\Api\Http\Response\Success\ApplicationSuccessResponse;
 
 /**
  * Class Autocheck.
  */
 class Autocheck
 {
-    private const VIN_AUTOCHECK_PATH = '/api/v1/autocheck';
-    private const VIN_REPORT_EXIST_PATH = '/api/v1/autocheck/check';
     private const QUERY_PARAM_API_KEY = 'api_key';
     private const QUERY_PARAM_VIN_CODE = 'vincode';
-    private stdClass $config;
+    private string $apiKey;
+    private Client $client;
     
-    public function __construct()
+    public function __construct(string $apiKey, Client $client)
     {
-        $this->config = include(__DIR__ . '/../config/config.php');
+        $this->apiKey = $apiKey;
+        $this->client = $client;
     }
     
     /**
-     * @param string $apiKey
      * @param string $vinCode
      *
      * @return ApiResponse
      */
-    public function getAutoCheckForVinCode(string $apiKey, string $vinCode): ApiResponse
+    public function getAutoCheckForVinCode(string $vinCode): ApiResponse
     {
-        $curl = curl_init();
-        
-        curl_setopt($curl, CURLOPT_URL, $this->buildAutoCheckForVinCodeRequestUrl($apiKey, $vinCode));
-        
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        
-        $output = curl_exec($curl);
-
-        curl_close($curl);
-        
-        $decodedOutput = json_decode($output, true);
-        
-        if (curl_getinfo($curl)['http_code'] !== VincodeAutocheckSuccessResponse::SUCCESS_CODE) {
-            return new ErrorResponse($decodedOutput);
-        }
-        
-        return new VincodeAutocheckSuccessResponse($decodedOutput);
+        $queryParams = $this->prepareQueryParams($this->apiKey, $vinCode);
+        $response = $this->client->request(ApiUriGlossary::VIN_AUTOCHECK_PATH, $queryParams);
+    
+        return $this->makeResponse($response);
     }
     
     /**
-     * @param string $apiKey
      * @param string $vinCode
      *
      * @return ApiResponse
      */
-    public function checkReportExists(string $apiKey, string $vinCode): ApiResponse
+    public function checkReportExists(string $vinCode): ApiResponse
     {
-        $curl = curl_init();
-        
-        curl_setopt($curl, CURLOPT_URL, $this->buildVinCodeReportExistRequestUrl($apiKey, $vinCode));
+        $queryParams = $this->prepareQueryParams($this->apiKey, $vinCode);
+        $response = $this->client->request(ApiUriGlossary::VIN_AUTOCHECK_REPORT_EXIST_PATH, $queryParams);
     
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        return $this->makeResponse($response);
+    }
     
-        $output = curl_exec($curl);
-    
-        curl_close($curl);
-    
-        $decodedOutput = json_decode($output, true);
-    
-        if (curl_getinfo($curl)['http_code'] !== ReportExistsSuccessResponse::SUCCESS_CODE) {
-            return new ErrorResponse($decodedOutput);
+    /**
+     * @param ClientResponse $clientResponse
+     *
+     * @return ApiResponse
+     */
+    private function makeResponse(ClientResponse $clientResponse): ApiResponse
+    {
+        if ($clientResponse->getCurlHttpCode() !== ApplicationSuccessResponse::SUCCESS_CODE) {
+            return new ApplicationErrorResponse($clientResponse);
         }
-        
-        return new ReportExistsSuccessResponse($decodedOutput);
+    
+        return new ApplicationSuccessResponse($clientResponse);
     }
     
     /**
      * @param string $apiKey
      * @param string $vinCode
      *
-     * @return string
+     * @return array
      */
-    private function buildAutoCheckForVinCodeRequestUrl(string $apiKey, string $vinCode): string
+    private function prepareQueryParams(string $apiKey, string $vinCode): array
     {
-        return $this->config->host . self::VIN_AUTOCHECK_PATH . '?' . self::QUERY_PARAM_API_KEY . '=' . $apiKey
-            . '&' . self::QUERY_PARAM_VIN_CODE . '=' . $vinCode;
-    }
-    
-    /**
-     * @param string $apiKey
-     * @param string $vinCode
-     *
-     * @return string
-     */
-    private function buildVinCodeReportExistRequestUrl(string $apiKey, string $vinCode): string
-    {
-        return $this->config->host . self::VIN_REPORT_EXIST_PATH . '?' . self::QUERY_PARAM_API_KEY . '=' . $apiKey
-            . '&' . self::QUERY_PARAM_VIN_CODE . '=' . $vinCode;
+        return [
+            self::QUERY_PARAM_API_KEY  => $apiKey,
+            self::QUERY_PARAM_VIN_CODE => $vinCode
+        ];
     }
 }

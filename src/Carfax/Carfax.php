@@ -3,103 +3,80 @@ declare(strict_types=1);
 
 namespace CheckVin\Api\Carfax;
 
-use CheckVin\Api\Response\ApiResponse;
-use CheckVin\Api\Response\Error\ErrorResponse;
-use CheckVin\Api\Response\Success\Carfax\CheckReportExists\SuccessResponse as ReportExistsSuccessResponse;
-use CheckVin\Api\Response\Success\Carfax\VincodeCarfax\SuccessResponse as VincodeCarfaxSuccessResponse;
-use stdClass;
+use CheckVin\Api\Config\ApiUriGlossary;
+use CheckVin\Api\Http\Client;
+use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
+use CheckVin\Api\Http\Response\ClientResponse;
+use CheckVin\Api\Http\Response\Error\ApplicationErrorResponse;
+use CheckVin\Api\Http\Response\Success\ApplicationSuccessResponse;
 
 /**
  * Class Carfax.
  */
 class Carfax
 {
-    private const VIN_CARFAX_PATH = '/api/v1/carfax';
-    private const VIN_REPORT_EXIST_PATH = '/api/v1/carfax/check';
     private const QUERY_PARAM_API_KEY = 'api_key';
     private const QUERY_PARAM_VIN_CODE = 'vincode';
-    private stdClass $config;
+    private string $apiKey;
+    private Client $client;
     
-    public function __construct()
+    public function __construct(string $apiKey, Client $client)
     {
-        $this->config = include(__DIR__ . '/../config/config.php');
+        $this->apiKey = $apiKey;
+        $this->client = $client;
     }
     
     /**
-     * @param string $apiKey
      * @param string $vinCode
      *
      * @return ApiResponse
      */
-    public function getCarfaxForVinCode(string $apiKey, string $vinCode): ApiResponse
+    public function getCarfaxForVinCode(string $vinCode): ApiResponse
     {
-        $curl = curl_init();
-        
-        curl_setopt($curl, CURLOPT_URL, $this->buildCarfaxForVinCodeRequestUrl($apiKey, $vinCode));
-        
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        
-        $output = curl_exec($curl);
-
-        curl_close($curl);
-        
-        $decodedOutput = json_decode($output, true);
-        
-        if (curl_getinfo($curl)['http_code'] !== VincodeCarfaxSuccessResponse::SUCCESS_CODE) {
-            return new ErrorResponse($decodedOutput);
-        }
-        
-        return new VincodeCarfaxSuccessResponse($decodedOutput);
+        $queryParams = $this->prepareQueryParams($this->apiKey, $vinCode);
+        $response = $this->client->request(ApiUriGlossary::VIN_CARFAX_PATH, $queryParams);
+    
+        return $this->makeResponse($response);
     }
     
     /**
-     * @param string $apiKey
      * @param string $vinCode
      *
      * @return ApiResponse
      */
-    public function checkReportExists(string $apiKey, string $vinCode): ApiResponse
+    public function checkReportExists(string $vinCode): ApiResponse
     {
-        $curl = curl_init();
-        
-        curl_setopt($curl, CURLOPT_URL, $this->buildVinCodeReportExistRequestUrl($apiKey, $vinCode));
-        
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        
-        $output = curl_exec($curl);
-        
-        curl_close($curl);
-        
-        $decodedOutput = json_decode($output, true);
-        
-        if (curl_getinfo($curl)['http_code'] !== ReportExistsSuccessResponse::SUCCESS_CODE) {
-            return new ErrorResponse($decodedOutput);
+        $queryParams = $this->prepareQueryParams($this->apiKey, $vinCode);
+        $response = $this->client->request(ApiUriGlossary::VIN_CARFAX_REPORT_EXIST_PATH, $queryParams);
+    
+        return $this->makeResponse($response);
+    }
+    
+    /**
+     * @param ClientResponse $clientResponse
+     *
+     * @return ApiResponse
+     */
+    private function makeResponse(ClientResponse $clientResponse): ApiResponse
+    {
+        if ($clientResponse->getCurlHttpCode() !== ApplicationSuccessResponse::SUCCESS_CODE) {
+            return new ApplicationErrorResponse($clientResponse);
         }
         
-        return new ReportExistsSuccessResponse($decodedOutput);
+        return new ApplicationSuccessResponse($clientResponse);
     }
     
     /**
      * @param string $apiKey
      * @param string $vinCode
      *
-     * @return string
+     * @return array
      */
-    private function buildCarfaxForVinCodeRequestUrl(string $apiKey, string $vinCode): string
+    private function prepareQueryParams(string $apiKey, string $vinCode): array
     {
-        return $this->config->host . self::VIN_CARFAX_PATH . '?' . self::QUERY_PARAM_API_KEY . '=' . $apiKey
-            . '&' . self::QUERY_PARAM_VIN_CODE . '=' . $vinCode;
-    }
-    
-    /**
-     * @param string $apiKey
-     * @param string $vinCode
-     *
-     * @return string
-     */
-    private function buildVinCodeReportExistRequestUrl(string $apiKey, string $vinCode): string
-    {
-        return $this->config->host . self::VIN_REPORT_EXIST_PATH . '?' . self::QUERY_PARAM_API_KEY . '=' . $apiKey
-            . '&' . self::QUERY_PARAM_VIN_CODE . '=' . $vinCode;
+        return [
+            self::QUERY_PARAM_API_KEY  => $apiKey,
+            self::QUERY_PARAM_VIN_CODE => $vinCode
+        ];
     }
 }

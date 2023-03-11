@@ -3,57 +3,51 @@ declare(strict_types=1);
 
 namespace CheckVin\Api\Balance;
 
-use CheckVin\Api\Response\ApiResponse;
-use CheckVin\Api\Response\Error\ErrorResponse;
-use CheckVin\Api\Response\Success\Balance\SuccessResponse;
-use stdClass;
+use CheckVin\Api\Config\ApiUriGlossary;
+use CheckVin\Api\Http\Client;
+use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
+use CheckVin\Api\Http\Response\Error\ApplicationErrorResponse;
+use CheckVin\Api\Http\Response\Success\ApplicationSuccessResponse;
 
 /**
  * Class Balance.
  */
 class Balance
 {
-    private const PATH = '/api/v1/carfax/balance';
     private const QUERY_PARAM_API_KEY = 'api_key';
-    private stdClass $config;
+    private string $apiKey;
+    private Client $client;
     
-    public function __construct()
+    public function __construct(string $apiKey, Client $client)
     {
-        $this->config = include(__DIR__ . '/../config/config.php');
+        $this->apiKey = $apiKey;
+        $this->client = $client;
     }
     
     /**
-     * @param string $apiKey
-     *
      * @return ApiResponse
      */
-    public function getCarfaxBalance(string $apiKey): ApiResponse
+    public function getBalance(): ApiResponse
     {
-        $curl = curl_init();
+        $queryParams = $this->prepareQueryParams($this->apiKey);
+        $response = $this->client->request(ApiUriGlossary::CHECK_BALANCE_PATH, $queryParams);
         
-        curl_setopt($curl, CURLOPT_URL, $this->buildRequestUrl($apiKey));
-
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-        $output = curl_exec($curl);
-
-        curl_close($curl);
-        
-        $decodedOutput = json_decode($output, true);
-        
-        if (curl_getinfo($curl)['http_code'] !== SuccessResponse::SUCCESS_CODE) {
-            return new ErrorResponse($decodedOutput);
+        if ($response->getCurlHttpCode() !== ApplicationSuccessResponse::SUCCESS_CODE) {
+            return new ApplicationErrorResponse($response);
         }
-        return new SuccessResponse($decodedOutput);
+        
+        return new ApplicationSuccessResponse($response);
     }
     
     /**
      * @param string $apiKey
      *
-     * @return string
+     * @return array
      */
-    private function buildRequestUrl(string $apiKey): string
+    private function prepareQueryParams(string $apiKey): array
     {
-        return $this->config->host . self::PATH . '?' . self::QUERY_PARAM_API_KEY . '=' . $apiKey;
+        return [
+            self::QUERY_PARAM_API_KEY => $apiKey
+        ];
     }
 }
