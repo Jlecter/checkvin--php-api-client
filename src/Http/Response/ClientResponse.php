@@ -11,6 +11,10 @@ class ClientResponse
     private array $data;
     private int $httpCode;
     
+    /**
+     * @param array $data
+     * @param int   $httpCode
+     */
     public function __construct(array $data, int $httpCode)
     {
         $this->data = $data;

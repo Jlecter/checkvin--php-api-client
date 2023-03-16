@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace CheckVin\Api\Balance;
+namespace CheckVin\Api\Provider\Balance;
 
 use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
 

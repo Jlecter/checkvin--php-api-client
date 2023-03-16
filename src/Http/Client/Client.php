@@ -16,6 +16,9 @@ class Client implements ClientInterface
 {
     private Config $config;
     
+    /**
+     * @param Config $config
+     */
     public function __construct(Config $config)
     {
         $this->config = $config;

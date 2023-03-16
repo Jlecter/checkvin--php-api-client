@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace CheckVin\Api\Carfax;
+namespace CheckVin\Api\Provider\Autocheck;
 
 use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
 
 /**
- * Interface CarfaxDataProviderInterface.
+ * Interface AutoCheckDataProviderInterface.
  */
-interface CarfaxDataProviderInterface
+interface AutoCheckDataProviderInterface
 {
     /**
      * @param string $vinCode
      *
      * @return ApiResponse
      */
-    public function getCarfaxForVinCode(string $vinCode): ApiResponse;
+    public function getAutoCheckForVinCode(string $vinCode): ApiResponse;
     
     /**
      * @param string $vinCode

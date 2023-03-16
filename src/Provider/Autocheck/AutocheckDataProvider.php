@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace CheckVin\Api\Autocheck;
+namespace CheckVin\Api\Provider\Autocheck;
 
 use CheckVin\Api\Config\ApiUriGlossary;
+use CheckVin\Api\Config\Config;
+use CheckVin\Api\Http\Client\Client;
 use CheckVin\Api\Http\Client\ClientInterface;
 use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
 
@@ -17,13 +19,16 @@ class AutocheckDataProvider implements AutoCheckDataProviderInterface
     private string $apiKey;
     private ClientInterface $client;
     
-    public function __construct(string $apiKey, ClientInterface $client)
+    /**
+     * @param string $apiKey
+     */
+    public function __construct(string $apiKey)
     {
         $this->apiKey = $apiKey;
-        $this->client = $client;
+        $this->client = new Client(new Config);
     }
     
-    /**
+    /**о
      * @param string $vinCode
      *
      * @return ApiResponse
