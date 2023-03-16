@@ -4,21 +4,19 @@ declare(strict_types=1);
 namespace CheckVin\Api\Balance;
 
 use CheckVin\Api\Config\ApiUriGlossary;
-use CheckVin\Api\Http\Client;
+use CheckVin\Api\Http\Client\ClientInterface;
 use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
-use CheckVin\Api\Http\Response\Error\ApplicationErrorResponse;
-use CheckVin\Api\Http\Response\Success\ApplicationSuccessResponse;
 
 /**
- * Class Balance.
+ * Class BalanceDataProvider.
  */
-class Balance
+class BalanceDataProvider implements BalanceDataProviderInterface
 {
     private const QUERY_PARAM_API_KEY = 'api_key';
     private string $apiKey;
-    private Client $client;
+    private ClientInterface $client;
     
-    public function __construct(string $apiKey, Client $client)
+    public function __construct(string $apiKey, ClientInterface $client)
     {
         $this->apiKey = $apiKey;
         $this->client = $client;
@@ -31,12 +29,8 @@ class Balance
     {
         $queryParams = $this->prepareQueryParams($this->apiKey);
         $response = $this->client->request(ApiUriGlossary::CHECK_BALANCE_PATH, $queryParams);
-        
-        if ($response->getCurlHttpCode() !== ApplicationSuccessResponse::SUCCESS_CODE) {
-            return new ApplicationErrorResponse($response);
-        }
-        
-        return new ApplicationSuccessResponse($response);
+    
+        return $this->client->makeResponse($response);
     }
     
     /**

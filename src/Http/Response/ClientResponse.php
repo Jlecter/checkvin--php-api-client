@@ -28,7 +28,7 @@ class ClientResponse
     /**
      * @return int
      */
-    public function getCurlHttpCode(): int
+    public function getResponseHttpCode(): int
     {
         return $this->httpCode;
     }

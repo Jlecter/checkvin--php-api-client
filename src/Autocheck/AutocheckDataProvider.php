@@ -4,23 +4,20 @@ declare(strict_types=1);
 namespace CheckVin\Api\Autocheck;
 
 use CheckVin\Api\Config\ApiUriGlossary;
-use CheckVin\Api\Http\Client;
+use CheckVin\Api\Http\Client\ClientInterface;
 use CheckVin\Api\Http\Response\Abstraction\ApiResponse;
-use CheckVin\Api\Http\Response\ClientResponse;
-use CheckVin\Api\Http\Response\Error\ApplicationErrorResponse;
-use CheckVin\Api\Http\Response\Success\ApplicationSuccessResponse;
 
 /**
- * Class Autocheck.
+ * Class AutocheckDataProvider.
  */
-class Autocheck
+class AutocheckDataProvider implements AutoCheckDataProviderInterface
 {
     private const QUERY_PARAM_API_KEY = 'api_key';
     private const QUERY_PARAM_VIN_CODE = 'vincode';
     private string $apiKey;
-    private Client $client;
+    private ClientInterface $client;
     
-    public function __construct(string $apiKey, Client $client)
+    public function __construct(string $apiKey, ClientInterface $client)
     {
         $this->apiKey = $apiKey;
         $this->client = $client;
@@ -36,7 +33,7 @@ class Autocheck
         $queryParams = $this->prepareQueryParams($this->apiKey, $vinCode);
         $response = $this->client->request(ApiUriGlossary::VIN_AUTOCHECK_PATH, $queryParams);
     
-        return $this->makeResponse($response);
+        return $this->client->makeResponse($response);
     }
     
     /**
@@ -49,21 +46,7 @@ class Autocheck
         $queryParams = $this->prepareQueryParams($this->apiKey, $vinCode);
         $response = $this->client->request(ApiUriGlossary::VIN_AUTOCHECK_REPORT_EXIST_PATH, $queryParams);
     
-        return $this->makeResponse($response);
-    }
-    
-    /**
-     * @param ClientResponse $clientResponse
-     *
-     * @return ApiResponse
-     */
-    private function makeResponse(ClientResponse $clientResponse): ApiResponse
-    {
-        if ($clientResponse->getCurlHttpCode() !== ApplicationSuccessResponse::SUCCESS_CODE) {
-            return new ApplicationErrorResponse($clientResponse);
-        }
-    
-        return new ApplicationSuccessResponse($clientResponse);
+        return $this->client->makeResponse($response);
     }
     
     /**
