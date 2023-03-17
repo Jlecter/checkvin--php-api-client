@@ -8,7 +8,7 @@ namespace CheckVin\Api\Config;
  */
 class Config
 {
-    private string $host = 'http://198.199.90.224';
+    private string $host = 'https://apicheckvin.xyz';
     
     /**
      * @return string

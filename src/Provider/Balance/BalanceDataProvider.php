@@ -24,7 +24,7 @@ class BalanceDataProvider implements BalanceDataProviderInterface
     public function __construct(string $apiKey)
     {
         $this->apiKey = $apiKey;
-        $this->client = new Client(new Config);
+        $this->client = new Client(new Config());
     }
     
     /**
