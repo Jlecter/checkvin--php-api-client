@@ -29,7 +29,7 @@ CheckVin API client is a package for a convenient working with <a href="https://
  INSTALLATION
 ------------
 
-Run: composer require jlecter/checkvin-api-client
+Run: composer require jlecter/checkvin-php-api-client
 
  USAGE
 ------------
