@@ -1,5 +1,5 @@
 {
-    "name": "checkvin/api-package",
+    "name": "jlecter/checkvin-php-api-client",
     "description": "Package for working with CheckVin API",
     "authors": [
         {
