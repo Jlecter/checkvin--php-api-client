@@ -1,6 +1,7 @@
 {
     "name": "jlecter/checkvin-php-api-client",
     "description": "Package for working with CheckVin API",
+    "license": "MIT",
     "authors": [
         {
             "name": "Illia Radchenko",
