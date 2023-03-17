@@ -17,7 +17,7 @@ CONTENTS OF THIS FILE
   DESCRIPTION
 ------------
 
-CheckVin API client is a package for a convenient working with <a href="https://checkvin.com.ua">"CheckVin"</a> API.
+CheckVin API client is a package for a convenient working with <a href="https://apicheckvin.xyz">CheckVin</a> API.
 
   KEY PACKAGES / EXTENSIONS
 ------------
