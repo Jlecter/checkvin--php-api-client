@@ -33,20 +33,19 @@ class Client implements ClientInterface
     public function request(string $path, array $params): ClientResponse
     {
         $curl = curl_init();
-    
         curl_setopt($curl, CURLOPT_URL, $this->buildRequestUrl($path, $params));
-    
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     
         $output = curl_exec($curl);
-    
-        curl_close($curl);
-        
         if (curl_errno($curl)) {
+            curl_close($curl);
             throw new \LogicException('Request failed. Message: '. curl_error($curl));
         }
     
-        return new ClientResponse(json_decode($output, true), curl_getinfo($curl)['http_code']);
+        $response = new ClientResponse(json_decode($output, true), curl_getinfo($curl)['http_code']);
+        curl_close($curl);
+
+        return $response;
     }
     
     /**
