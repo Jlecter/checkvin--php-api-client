@@ -12,7 +12,9 @@ CONTENTS OF THIS FILE
   UPDATES
 ------------
 
-17.03.2023 - published version (<b>v0.1.0</b>) - added an ability to work with AutoCheck, Balance, Carfax.
+- **17.03.2023** - published version (<b>v0.1.0</b>) - added an ability to work with AutoCheck, Balance, Carfax.
+- **16.08.2023** - published version (<b>v0.2.0</b>) - fixed curl close bug.
+- **21.01.2024** - published version (<b>v0.3.0</b>) - added VehicleProvider.
  
   DESCRIPTION
 ------------
@@ -38,6 +40,7 @@ Run: composer require jlecter/checkvin-php-api-client
 - AutocheckDataProvider
 - BalanceDataProvider
 - CarfaxDataProvider
+- VehicleDataProvider
 
 2. Use it by passing inside your API key and calling available methods.
 

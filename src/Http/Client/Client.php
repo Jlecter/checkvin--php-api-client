@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CheckVin\Api\Http\Client;
@@ -9,27 +10,15 @@ use CheckVin\Api\Http\Response\ClientResponse;
 use CheckVin\Api\Http\Response\Error\ApplicationErrorResponse;
 use CheckVin\Api\Http\Response\Success\ApplicationSuccessResponse;
 
-/**
- * Class Client.
- */
 class Client implements ClientInterface
 {
     private Config $config;
     
-    /**
-     * @param Config $config
-     */
     public function __construct(Config $config)
     {
         $this->config = $config;
     }
     
-    /**
-     * @param string $path
-     * @param array  $params
-     *
-     * @return ClientResponse
-     */
     public function request(string $path, array $params): ClientResponse
     {
         $curl = curl_init();
@@ -48,11 +37,6 @@ class Client implements ClientInterface
         return $response;
     }
     
-    /**
-     * @param ClientResponse $clientResponse
-     *
-     * @return ApiResponse
-     */
     public function makeResponse(ClientResponse $clientResponse): ApiResponse
     {
         if ($clientResponse->getResponseHttpCode() !== ApplicationSuccessResponse::SUCCESS_CODE) {
@@ -62,12 +46,6 @@ class Client implements ClientInterface
         return new ApplicationSuccessResponse($clientResponse);
     }
     
-    /**
-     * @param string $path
-     * @param array  $params
-     *
-     * @return string
-     */
     private function buildRequestUrl(string $path, array $params): string
     {
         return $this->config->getHost() . $path . '?' . http_build_query($params);
